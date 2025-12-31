@@ -133,10 +133,9 @@ Burn Rate: ${formatCurrency(totalHourlyRate)}/hr
 ---------------------------------
 TOTAL MONEY EVAPORATED: ${formatCurrency(totalBurned)}
 ---------------------------------
-Verdict: ${currentStatus.message}
 "Should this have been an email?"
 Generated via The Meeting Burner`;
-  }, [elapsedSeconds, totalPeople, totalHourlyRate, totalBurned, currentStatus]);
+  }, [elapsedSeconds, totalPeople, totalHourlyRate, totalBurned]);
 
   const handleStopAndShame = () => {
     setIsRunning(false);
