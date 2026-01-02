@@ -5,21 +5,19 @@ const fs = require('fs');
 const app = express();
 const port = process.env.PORT || 8080;
 
-// The root of the application is where server.js lives
+// The root of the application
 const APP_ROOT = path.resolve(__dirname);
-// The public directory where SEO files are now located
-const PUBLIC_DIR = path.join(APP_ROOT, 'public');
 
 console.log('==================================================');
 console.log('>>> THE MEETING BURNER - SERVER STARTUP');
 console.log('>>> PORT:', port);
-console.log('>>> PUBLIC DIR:', PUBLIC_DIR);
+console.log('>>> ROOT PATH:', APP_ROOT);
 console.log('==================================================');
 
 // 1. Health Check for Cloud Run
 app.get('/healthz', (req, res) => res.status(200).send('OK'));
 
-// 2. Explicit SEO File Routes (Looking in /public)
+// 2. Explicit SEO File Routes from Root
 const seoFiles = {
   '/robots.txt': 'text/plain',
   '/ads.txt': 'text/plain',
@@ -28,24 +26,22 @@ const seoFiles = {
 
 Object.entries(seoFiles).forEach(([route, mimeType]) => {
   app.get(route, (req, res) => {
-    const fileName = route.substring(1);
-    const filePath = path.join(PUBLIC_DIR, fileName);
+    const fileName = route.substring(1); // remove leading slash
+    const filePath = path.join(APP_ROOT, fileName);
 
     if (fs.existsSync(filePath)) {
-      console.log(`[SEO] Serving ${route} from public/ folder`);
+      console.log(`[SEO] Serving ${route} from root`);
       res.setHeader('Content-Type', mimeType);
+      res.setHeader('Cache-Control', 'public, max-age=3600');
       return res.sendFile(filePath);
     } else {
-      console.error(`[SEO ERROR] ${route} not found in public/ at ${filePath}`);
+      console.error(`[SEO ERROR] ${route} not found at ${filePath}`);
       res.status(404).send('Not Found');
     }
   });
 });
 
-// 3. Static Assets
-// First, check public folder for assets
-app.use(express.static(PUBLIC_DIR));
-// Then check the root (for index.html, index.tsx, etc.)
+// 3. Static Assets (Serving from Root)
 app.use(express.static(APP_ROOT));
 
 // 4. SPA Catch-all
