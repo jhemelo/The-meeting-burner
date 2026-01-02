@@ -1,59 +1,46 @@
-const express = require('express');
-const path = require('path');
-const fs = require('fs');
+import express from 'express';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import fs from 'fs';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const port = process.env.PORT || 8080;
 
-// The root of the application
-const APP_ROOT = path.resolve(__dirname);
+// In a Remix SPA, Vite merges public/ content into build/client/
+const BUILD_PATH = path.join(__dirname, 'build', 'client');
 
-console.log('==================================================');
-console.log('>>> THE MEETING BURNER - SERVER STARTUP');
-console.log('>>> PORT:', port);
-console.log('>>> ROOT PATH:', APP_ROOT);
-console.log('==================================================');
+console.log('--- MEETING BURNER PROD SERVER ---');
+console.log('Target Port:', port);
+console.log('Static Root:', BUILD_PATH);
 
-// 1. Health Check for Cloud Run
+// 1. Health check for Cloud Run infrastructure
 app.get('/healthz', (req, res) => res.status(200).send('OK'));
 
-// 2. Explicit SEO File Routes from Root
-const seoFiles = {
-  '/robots.txt': 'text/plain',
-  '/ads.txt': 'text/plain',
-  '/sitemap.xml': 'application/xml'
-};
-
-Object.entries(seoFiles).forEach(([route, mimeType]) => {
-  app.get(route, (req, res) => {
-    const fileName = route.substring(1); // remove leading slash
-    const filePath = path.join(APP_ROOT, fileName);
-
-    if (fs.existsSync(filePath)) {
-      console.log(`[SEO] Serving ${route} from root`);
-      res.setHeader('Content-Type', mimeType);
-      res.setHeader('Cache-Control', 'public, max-age=3600');
-      return res.sendFile(filePath);
-    } else {
-      console.error(`[SEO ERROR] ${route} not found at ${filePath}`);
-      res.status(404).send('Not Found');
+// 2. Serve Static Assets (This makes ads.txt, robots.txt, etc. available at /)
+app.use(express.static(BUILD_PATH, {
+  maxAge: '1h',
+  setHeaders: (res, filePath) => {
+    // Ensure HTML is not cached so users always get the latest SPA bundle
+    if (filePath.endsWith('.html')) {
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     }
-  });
-});
+  }
+}));
 
-// 3. Static Assets (Serving from Root)
-app.use(express.static(APP_ROOT));
-
-// 4. SPA Catch-all
+// 3. SPA Catch-all Routing
+// Since this is an SPA, all non-file requests must serve index.html
 app.get('*', (req, res) => {
-  const indexPath = path.join(APP_ROOT, 'index.html');
+  const indexPath = path.join(BUILD_PATH, 'index.html');
   if (fs.existsSync(indexPath)) {
     res.sendFile(indexPath);
   } else {
-    res.status(404).send('Application Not Found');
+    res.status(404).send('Build artifacts not found. Deployment error.');
   }
 });
 
 app.listen(port, '0.0.0.0', () => {
-  console.log(`>>> SERVER LISTENING ON 0.0.0.0:${port}`);
+  console.log(`>>> Meeting Burner live at http://0.0.0.0:${port}`);
 });

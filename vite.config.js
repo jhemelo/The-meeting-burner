@@ -3,9 +3,10 @@ import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
+  // Vite looks for the 'public' directory at the project root by default
+  publicDir: 'public',
   plugins: [
     remix({
-      // Maintaining the app directory at root to ensure all existing files are processed
       appDirectory: ".",
       ssr: false, 
     }),
@@ -13,7 +14,6 @@ export default defineConfig({
   ],
   build: {
     rollupOptions: {
-      // Added requested external packages for build optimization
       external: ['some-external-package']
     }
   }
