@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "cleanUrls": true,
+  "framework": "remix",
+  "rewrites": [
+    {
+      "source": "/(ads.txt|robots.txt|sitemap.xml)",
+      "destination": "/$1"
+    }
+  ]
+}

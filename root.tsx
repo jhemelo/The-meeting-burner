@@ -1,7 +1,6 @@
 import {
   Links,
   Meta,
-  Outlet,
   Scripts,
   ScrollRestoration,
 } from "@remix-run/react";
@@ -33,7 +32,6 @@ export default function Root() {
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet" />
         
-        {/* Inline styles ported from index.html */}
         <style dangerouslySetInnerHTML={{ __html: `
           html { font-size: 17px; }
           @media (min-width: 1024px) { html { font-size: 18px; } }
