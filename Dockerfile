@@ -2,12 +2,13 @@ FROM node:20-slim
 
 WORKDIR /app
 
-# Install deps first (better caching)
 COPY package*.json ./
-RUN npm install --omit=dev
+RUN npm ci
 
-# Copy app files
 COPY . .
+
+# Build the Vite app -> creates /app/dist
+RUN npm run build
 
 ENV PORT=8080
 EXPOSE 8080
