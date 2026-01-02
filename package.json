@@ -4,15 +4,9 @@
   "description": "Real-time meeting cost calculator",
   "main": "server.js",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
     "start": "node server.js"
   },
   "dependencies": {
     "express": "^4.18.2"
-  },
-  "devDependencies": {
-    "vite": "^5.0.0"
   }
 }
